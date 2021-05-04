@@ -1,4 +1,4 @@
-const { gql } = require("apollo-server");
+const { gql } = require('apollo-server')
 
 module.exports = gql`
   type User {
@@ -27,4 +27,4 @@ module.exports = gql`
     ): User!
     sendMessage(to: String!, content: String!): Message!
   }
-`;
+`
