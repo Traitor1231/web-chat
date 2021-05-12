@@ -6,7 +6,7 @@ module.exports = {
     createdAt: parent => parent.createdAt.toISOString(),
   },
   User: {
-    createdAt: parent => parent.createdAt.toISOString(),
+    createdAt: parent => parent.createdAt,
   },
   Query: {
     ...userResolvers.Query,
