@@ -1,7 +1,22 @@
 import React, { createContext, useReducer, useContext } from 'react'
-
+import jwtDecode from 'jwt-decode'
 const AuthStateContext = createContext()
 const AuthDispatchContext = createContext()
+
+let user = null
+const token = localStorage.getItem('token')
+if (token) {
+  const decodedToken = jwtDecode(token)
+  const expiresAt = new Date(decodedToken.exp * 1000)
+  if (new Date() > expiresAt) {
+    localStorage.removeItem('token')
+  } else {
+    user = decodedToken
+  }
+  console.log(decodedToken)
+} else {
+  console.log('No token found')
+}
 
 const authReducer = (state, action) => {
   switch (action.type) {
