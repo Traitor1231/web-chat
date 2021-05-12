@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs')
 const { UserInputError, AuthenticationError } = require('apollo-server')
 const jwt = require('jsonwebtoken')
-const { User } = require('../../models')
 const { Op } = require('sequelize')
+
+const { Message, User } = require('../../models')
 const { JWT_SECRET } = require('../../config/env.json')
 
 module.exports = {
@@ -11,8 +12,24 @@ module.exports = {
       try {
         if (!user) throw new AuthenticationError('Unauthenticated')
 
-        const users = await User.findAll({
+        let users = await User.findAll({
+          attributes: ['username', 'imageUrl', 'createdAt'],
           where: { username: { [Op.ne]: user.username } },
+        })
+
+        const allUserMessages = await Message.findAll({
+          where: {
+            [Op.or]: [{ from: user.username }, { to: user.username }],
+          },
+          order: [['createdAt', 'DESC']],
+        })
+
+        users = users.map(otherUser => {
+          const latestMessage = allUserMessages.find(
+            m => m.from === otherUser.username || m.to === otherUser.username,
+          )
+          otherUser.latestMessage = latestMessage
+          return otherUser
         })
 
         return users
@@ -24,10 +41,11 @@ module.exports = {
     login: async (_, args) => {
       const { username, password } = args
       let errors = {}
+
       try {
         if (username.trim() === '')
           errors.username = 'username must not be empty'
-        if (username === '') errors.username = 'password must not be empty'
+        if (password === '') errors.password = 'password must not be empty'
 
         if (Object.keys(errors).length > 0) {
           throw new UserInputError('bad input', { errors })
@@ -46,18 +64,13 @@ module.exports = {
 
         if (!correctPassword) {
           errors.password = 'password is incorrect'
-          throw new AuthenticationError('password is incorrect', {
-            errors,
-          })
+          throw new UserInputError('password is incorrect', { errors })
         }
 
-        const token = jwt.sign(
-          {
-            username,
-          },
-          JWT_SECRET,
-          { expiresIn: 60 * 60 },
-        )
+        const token = jwt.sign({ username }, JWT_SECRET, {
+          expiresIn: 60 * 60,
+        })
+
         return {
           ...user.toJSON(),
           createdAt: user.createdAt.toISOString(),
@@ -107,9 +120,11 @@ module.exports = {
           email,
           password,
         })
+
         // Return user
         return user
       } catch (err) {
+        console.log(err)
         if (err.name === 'SequelizeUniqueConstraintError') {
           err.errors.forEach(
             e => (errors[e.path] = `${e.path} is already taken`),

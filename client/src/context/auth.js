@@ -13,7 +13,6 @@ if (token) {
   } else {
     user = decodedToken
   }
-  console.log(decodedToken)
 } else {
   console.log('No token found')
 }
