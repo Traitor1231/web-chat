@@ -8,6 +8,7 @@
     "bcryptjs": "^2.4.3",
     "graphql": "^15.3.0",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.1",
     "mysql2": "^2.1.0",
     "react-router-dom": "^5.2.0",
     "sequelize": "^6.6.2"
