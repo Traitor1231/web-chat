@@ -26,14 +26,14 @@ export default function Register(props) {
   const dispatch = useAuthDispatch()
 
   const [loginUser, { loading }] = useLazyQuery(LOGIN_USER, {
-    onError: err => setErrors(err.graphQLErrors[0].extensions.errors),
+    onError: (err) => setErrors(err.graphQLErrors[0].extensions.errors),
     onCompleted(data) {
       dispatch({ type: 'LOGIN', payload: data.login })
       props.history.push('/')
     },
   })
 
-  const submitLoginForm = e => {
+  const submitLoginForm = (e) => {
     e.preventDefault()
 
     loginUser({ variables })
@@ -52,7 +52,7 @@ export default function Register(props) {
               type="text"
               value={variables.username}
               className={errors.username && 'is-invalid'}
-              onChange={e =>
+              onChange={(e) =>
                 setVariables({ ...variables, username: e.target.value })
               }
             />
@@ -65,7 +65,7 @@ export default function Register(props) {
               type="password"
               value={variables.password}
               className={errors.password && 'is-invalid'}
-              onChange={e =>
+              onChange={(e) =>
                 setVariables({ ...variables, password: e.target.value })
               }
             />
